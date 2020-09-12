@@ -15,8 +15,9 @@ if not os.path.isdir(save_dir):
     os.mkdir(save_dir)
 
 # URL components
-base_url_snippet = 'http://data.un.org/Handlers/DownloadHandler.ashx?&Format=csv&'
-end_url_snippet = '&s=_cr_engNameOrderBy:asc,fiscal_year:desc,_grIt_code:asc'
+base_url_snippet = 'http://data.un.org/Handlers/DownloadHandler.ashx?'
+end_url_snippet = '&s=_cr_engNameOrderBy:asc,fiscal_year:desc,'
+sort_code_snippet = '_grIt_code:asc'
 
 # Retrieve list of UN 2-digit country codes
 print('Getting UN country codes')
@@ -31,28 +32,28 @@ year_rng = range(year_start, year_end)
 all_year_strings = [str(x) for x in list(year_rng)]
 
 # UN Table options
-table_optons = [{'tbl_id': 101, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+table_optons = [{'tbl_id': 203, 'col_specs': 'c=2,3,5,6,8,9,10,11,12,13,14,15', 'sort_code': '_grSbIt_code:asc'}
+                , {'tbl_id': 101, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
                 , {'tbl_id': 102, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13,14'}
                 , {'tbl_id': 103, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
                 , {'tbl_id': 201, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 202, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13,14'}
-                , {'tble_id': 203, 'col_specs': 'c=2,3,5,6,8,9,10,11,12,13,14,15'}
-                , {'tble_id': 204, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 205, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13,14'}
-                , {'tble_id': 206, 'col_specs': 'c=2,3,5,6,8,9,10,11,12,13,14,15'}
-                , {'tble_id': 301, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 302, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 401, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 402, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 403, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 404, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 405, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 406, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 407, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 408, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 409, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
-                , {'tble_id': 501, 'col_specs': 'c=2,3,5,6,8,9,10,11,12,13,14,15'}
-                , {'tble_id': 502, 'col_specs': 'c=2,3,5,6,8,9,10,11,12,13,14,15'}
+                , {'tbl_id': 202, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13,14'}
+                , {'tbl_id': 204, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 205, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13,14'}
+                , {'tbl_id': 206, 'col_specs': 'c=2,3,5,6,8,9,10,11,12,13,14,15', 'sort_code': '_grSbIt_code:asc'}
+                , {'tbl_id': 301, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 302, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 401, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 402, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 403, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 404, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 405, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 406, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 407, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 408, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 409, 'col_specs': 'c=2,3,4,6,7,8,9,10,11,12,13'}
+                , {'tbl_id': 501, 'col_specs': 'c=2,3,5,6,8,9,10,11,12,13,14,15'}
+                , {'tbl_id': 502, 'col_specs': 'c=2,3,5,6,8,9,10,11,12,13,14,15'}
                 ]
 
 # Create a store to remember requests
@@ -97,6 +98,11 @@ for un_table in table_optons:
             csv_url = (base_url_snippet + 'DataFilter=group_code:' + str(un_table_id)
                        + ';country_code:' + str(country_code) + ';fiscal_year:' + ','.join(all_year_strings)
                        + '&DataMartId=SNA&Format=csv&' + un_table['col_specs'] + end_url_snippet)
+
+            if 'sort_code' in un_table:
+                csv_url = csv_url + un_table['sort_code']
+            else:
+                csv_url = csv_url + sort_code_snippet
 
             # Make request
             req = requests.get(csv_url, allow_redirects=True)
