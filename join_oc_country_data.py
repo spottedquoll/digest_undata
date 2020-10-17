@@ -22,7 +22,7 @@ year_start = 1990
 year_end = 2018
 
 # Tables to join
-table_codes = [201]  #101, , 203, 302, 401]
+table_codes = [401]  #101, 201, 203, 302, 401]
 
 # Apply change to columns
 
@@ -41,6 +41,10 @@ def fix_group_name_va(row):
     else:
         group_name = row['group_name']
     return 'Table ' + row['group_code'].replace('0', '.') + ' Value added by ' + group_name
+
+
+def fix_group_name_generic(row):
+    return 'Table ' + row['group_code'].replace('0', '.')
 
 
 print('Joining')
@@ -78,30 +82,64 @@ for un_table in table_codes:
                                         , 'SNA93 Table Code': 'group_code', 'Sub Group': 'group_name'
                                         , 'SNA93 Item Code': 'sna93_item_code', 'Year': 'fiscal_year'
                                         , 'Series': 'series_number', 'Currency': 'currency_name'
-                                        , 'Value Footnotes': 'footnote_text', 'SNA System': 'base_year'
-                                        , 'Value': 'sna_value'
+                                        , 'Value Footnotes': 'footnote_text', 'Value': 'sna_value'
                                         }
                                , errors='raise')
 
+            if 'SNA System' in data.columns:
+                data = data.rename(columns={'SNA System': 'base_year'}, errors='raise')
+            elif 'SNA system' in data.columns:
+                data = data.rename(columns={'SNA system': 'base_year'}, errors='raise')
+
             # Fix colummns
-            if un_table in [101, 201]:
+            data['group_code'] = data.apply(fix_group_code, axis=1)
 
-                data['group_code'] = data.apply(fix_group_code, axis=1)
+            if un_table is 101:
+                data['group_name'] = data.apply(fix_group_name, axis=1)
+            elif un_table is 201:
+                data['group_name'] = data.apply(fix_group_name_va, axis=1)
+            elif un_table in [203, 302, 401]:
+                data['group_name'] = data.apply(fix_group_name_generic, axis=1)
 
-                if un_table is 101:
-                    data['group_name'] = data.apply(fix_group_name, axis=1)
-                elif un_table is 201:
-                    data['group_name'] = data.apply(fix_group_name_va, axis=1)
+            col = data.pop('group_name')
+            data.insert(4, col.name, col)
 
-                data.insert(4, 'item_code', 99)
+            if un_table is 203:
+                data.insert(5, 'item_code', 99)
                 col = data.pop('sna93_item_code')
-                data.insert(5, col.name, col)
-                data.insert(7, 'sub_item_code', 0)
+                data.insert(6, col.name, col)
+                data.insert(8, 'sub_item_code', 0)
+            else:
+                data.insert(4, 'item_code', 99)
+                col = data.pop('item_name')
+                data.insert(6, col.name, col)
+                col = data.pop('sna93_item_code')
+                data.insert(7, col.name, col)
+                data.insert(8, 'sub_item_code', 0)
+
+            if 'Sub Item' in data.columns:
+                data = data.rename(columns={'Sub Item': 'sub_item_name'}, errors='raise')
+                col = data.pop('sub_item_name')
+                data.insert(8, col.name, col)
+            else:
                 data.insert(8, 'sub_item_name', '')
-                data.insert(11, 'sub_series_number', 0)
-                col = data.pop('currency_name')
-                data.insert(16, col.name, col)
-                data = data.drop(['Fiscal Year Type'], axis=1)  # Remove columns
+
+            data.insert(11, 'sub_series_number', 0)
+            col = data.pop('currency_name')
+            data.insert(16, col.name, col)
+
+            # Remove column
+            if 'Fiscal Year Type' in data.columns:
+                data = data.drop(['Fiscal Year Type'], axis=1)
+            elif 'Fiscal year type' in data.columns:
+                data = data.drop(['Fiscal year type'], axis=1)
+
+            # General fix for column order
+            if un_table_id in [302, 401]:
+                data = data.reindex(columns=['country_code', 'country_name', 'group_code', 'group_name'
+                                             , 'item_code', 'sna93_item_code', 'item_name', 'sub_item_code'
+                                             , 'sub_item_name', 'fiscal_year', 'series_number', 'sub_series_number'
+                                             , 'base_year', 'sna_value', 'footnote_text', 'currency_name'])
 
             # Do join
             if df_joined.shape[0] != 0:
